@@ -34,7 +34,7 @@
         <tbody>
             @forelse ($mahasiswa as $m)
                 <tr class="border-b hover:bg-blue-50 transition">
-                    <td class="py-3 px-4">{{ $m->id }}</td>
+                    <td class="py-3 px-4">{{ $loop->iteration }}</td>
                     <td class="py-3 px-4 font-mono">{{ $m->nim }}</td>
                     <td class="py-3 px-4 font-semibold">{{ $m->nama }}</td>
                     <td class="py-3 px-4">{{ $m->prodi }}</td>
