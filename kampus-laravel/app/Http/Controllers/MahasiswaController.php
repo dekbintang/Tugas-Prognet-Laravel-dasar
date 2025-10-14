@@ -27,6 +27,12 @@ class MahasiswaController extends Controller
             'nim' => 'required|unique:mahasiswa,nim|min:4',
             'nama' => 'required',
             'prodi' => 'required'
+        ], [
+            'nim.required' => 'NIM wajib diisi.',
+            'nim.unique' => 'NIM ini sudah digunakan, silakan masukkan NIM lain.',
+            'nim.min' => 'NIM harus terdiri dari minimal 4 karakter.',
+            'nama.required' => 'Nama mahasiswa wajib diisi.',
+            'prodi.required' => 'Program studi wajib diisi.'
         ]);
 
         Mahasiswa::create($request->only('nim', 'nama', 'prodi'));
@@ -47,6 +53,12 @@ class MahasiswaController extends Controller
             'nim' => 'required|min:4|unique:mahasiswa,nim,' . $mahasiswa->id,
             'nama' => 'required',
             'prodi' => 'required'
+        ], [
+            'nim.required' => 'NIM wajib diisi.',
+            'nim.min' => 'NIM harus terdiri dari minimal 4 karakter.',
+            'nim.unique' => 'NIM ini sudah digunakan oleh mahasiswa lain.',
+            'nama.required' => 'Nama mahasiswa wajib diisi.',
+            'prodi.required' => 'Program studi wajib diisi.'
         ]);
 
         $mahasiswa->update($request->only('nim', 'nama', 'prodi'));

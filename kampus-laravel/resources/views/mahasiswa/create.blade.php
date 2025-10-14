@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="bg-white shadow-xl rounded-2xl p-8 max-w-2xl mx-auto">
-    <h2 class="text-2xl font-bold text-blue-800 mb-6 border-b pb-3">➕ Tambah Mahasiswa Baru</h2>
+    <h2 class="text-2xl font-bold text-blue-800 mb-6 border-b pb-3">Tambah Mahasiswa Baru</h2>
 
     @if ($errors->any())
         <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">

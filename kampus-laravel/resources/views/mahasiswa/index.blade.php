@@ -2,7 +2,7 @@
 @section('title', 'Daftar Mahasiswa')
 
 @section('content')
-<div class="bg-white shadow-xl rounded-2xl p-8 relative">
+<div class="bg-white shadow-2xl rounded-2xl p-8 max-w-6xl mx-auto relative border border-gray-200">
 
     {{-- Pesan sukses --}}
     @if(session('success'))
@@ -11,66 +11,69 @@
         </div>
     @endif
 
-    {{-- Header & Tombol Tambah --}}
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-blue-800 border-b pb-2">📋 Daftar Mahasiswa</h2>
+    {{-- Header --}}
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-blue-800">🎓 Daftar Mahasiswa</h2>
+            <p class="text-gray-500 mt-1">Menampilkan seluruh data mahasiswa yang terdaftar.</p>
+        </div>
         <a href="{{ route('mahasiswa.create') }}" 
-           class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-5 py-2 rounded-lg shadow-md font-semibold hover:from-yellow-500 hover:to-yellow-600 transition">
-           ➕ Tambah Mahasiswa
+           class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-5 py-2 rounded-xl shadow-md font-semibold hover:from-yellow-500 hover:to-yellow-600 transition transform hover:scale-105">
+           Tambah Mahasiswa
         </a>
     </div>
 
-    {{-- Tabel Daftar Mahasiswa --}}
-    <table class="w-full border-collapse">
-        <thead>
-            <tr class="bg-gradient-to-r from-blue-800 to-blue-600 text-white">
-                <th class="py-3 px-4 text-left rounded-tl-lg">#</th>
-                <th class="py-3 px-4 text-left">NIM</th>
-                <th class="py-3 px-4 text-left">Nama</th>
-                <th class="py-3 px-4 text-left">Program Studi</th>
-                <th class="py-3 px-4 text-center rounded-tr-lg">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($mahasiswa as $m)
-                <tr class="border-b hover:bg-blue-50 transition">
-                    <td class="py-3 px-4">{{ $loop->iteration }}</td>
-                    <td class="py-3 px-4 font-mono">{{ $m->nim }}</td>
-                    <td class="py-3 px-4 font-semibold">{{ $m->nama }}</td>
-                    <td class="py-3 px-4">{{ $m->prodi }}</td>
-                    <td class="py-3 px-4 text-center">
-                        <a href="{{ route('mahasiswa.edit', $m->id) }}" 
-                           class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition mr-2">
-                            Edit
-                        </a>
-
-                        <button type="button"
-                                onclick="openConfirmModal({{ $m->id }})"
-                                class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition">
-                            Hapus
-                        </button>
-
-                        {{-- Form Hapus --}}
-                        <form id="delete-form-{{ $m->id }}" 
-                              action="{{ route('mahasiswa.destroy', $m->id) }}" 
-                              method="POST" class="hidden">
-                            @csrf
-                            @method('DELETE')
-                        </form>
-                    </td>
+    {{-- Tabel --}}
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse rounded-xl overflow-hidden shadow-md">
+            <thead>
+                <tr class="bg-gradient-to-r from-blue-800 to-blue-600 text-white">
+                    <th class="py-3 px-4 rounded-tl-xl">#</th>
+                    <th class="py-3 px-4">NIM</th>
+                    <th class="py-3 px-4">Nama</th>
+                    <th class="py-3 px-4">Program Studi</th>
+                    <th class="py-3 px-4 text-center rounded-tr-xl">Aksi</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="py-6 text-center text-gray-500 italic">
-                        Belum ada data mahasiswa.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @forelse ($mahasiswa as $m)
+                    <tr class="border-b hover:bg-blue-50 transition duration-200">
+                        <td class="py-3 px-4">{{ $loop->iteration }}</td>
+                        <td class="py-3 px-4 font-mono">{{ $m->nim }}</td>
+                        <td class="py-3 px-4 font-semibold text-gray-800">{{ $m->nama }}</td>
+                        <td class="py-3 px-4">{{ $m->prodi }}</td>
+                        <td class="py-3 px-4 text-center space-x-2">
+                            <a href="{{ route('mahasiswa.edit', $m->id) }}" 
+                               class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
+                                Edit
+                            </a>
+                            <button type="button"
+                                    onclick="openConfirmModal({{ $m->id }})"
+                                    class="inline-block bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition">
+                                Hapus
+                            </button>
+
+                            <form id="delete-form-{{ $m->id }}" 
+                                  action="{{ route('mahasiswa.destroy', $m->id) }}" 
+                                  method="POST" class="hidden">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="py-6 text-center text-gray-500 italic">
+                            Belum ada data mahasiswa.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
-{{-- Modal Konfirmasi Elegan --}}
+{{-- Modal Konfirmasi --}}
 <div id="confirmModal" 
      class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-[90%] max-w-md p-6 text-center transform scale-95 transition-all duration-300">
@@ -89,11 +92,9 @@
     </div>
 </div>
 
-{{-- Script Modal --}}
 <script>
     let deleteId = null;
 
-    // Buka modal konfirmasi
     function openConfirmModal(id) {
         deleteId = id;
         const modal = document.getElementById('confirmModal');
@@ -101,7 +102,6 @@
         modal.classList.add('flex', 'opacity-100');
     }
 
-    // Tutup modal konfirmasi
     function closeConfirmModal() {
         const modal = document.getElementById('confirmModal');
         modal.classList.remove('flex', 'opacity-100');
@@ -109,7 +109,6 @@
         deleteId = null;
     }
 
-    // Jalankan saat tombol "Ya, Hapus" diklik
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('confirmDeleteBtn');
         btn.addEventListener('click', () => {
