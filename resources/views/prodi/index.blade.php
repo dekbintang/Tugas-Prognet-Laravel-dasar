@@ -1,20 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Mahasiswa')
+@section('title', 'Daftar Program Studi')
 
 @section('content')
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-secondary fw-bold">Daftar Mahasiswa</h2>
-        <a href="{{ route('mahasiswa.create') }}" class="btn btn-success btn-gradient d-flex align-items-center">
-            <i class="bi bi-plus-lg me-2"></i> Tambah Mahasiswa
+        <h2 class="text-secondary fw-bold">Daftar Program Studi</h2>
+        <a href="{{ route('prodi.create') }}" class="btn btn-success btn-gradient d-flex align-items-center">
+            <i class="bi bi-plus-lg me-2"></i> Tambah Program Studi
         </a>
     </div>
 
-    {{-- Flash Message --}}
-    @if(session()->has('success'))
-        <div class="alert alert-success shadow-sm rounded-3">
-            {{ session()->pull('success') }}
+    @if(session()->has('error'))
+        <div class="alert alert-danger shadow-sm rounded-3 py-2 px-3 mb-4">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -24,32 +23,31 @@
                 <thead style="background: linear-gradient(135deg, #a8e6cf, #dcedc1); color: #2c3e50;">
                     <tr>
                         <th>#</th>
-                        <th>Nama</th>
-                        <th>NIM</th>
-                        <th>Prodi</th>
+                        <th>Nama Program Studi</th>
+                        <th>Fakultas</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($mahasiswa as $item)
+                    @forelse($prodi as $item)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->nama }}</td>
-                        <td>{{ $item->nim }}</td>
-                        <td>{{ $item->prodi->nama_prodi ?? '-' }}</td>
+                        <td>{{ $item->nama_prodi }}</td>
+                        <td>{{ $item->fakultas->nama_fakultas ?? '-' }}</td>
                         <td class="text-center">
-                            <a href="{{ route('mahasiswa.edit', $item->id) }}" class="btn btn-outline-warning btn-sm me-2">
+                            <a href="{{ route('prodi.edit', $item->id) }}" class="btn btn-outline-warning btn-sm me-2">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
                             <button type="button" class="btn btn-outline-danger btn-sm deleteBtn" 
-                                data-id="{{ $item->id }}" data-nama="{{ $item->nama }}" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                data-id="{{ $item->id }}" data-nama="{{ $item->nama_prodi }}" 
+                                data-bs-toggle="modal" data-bs-target="#deleteModal">
                                 <i class="bi bi-trash3"></i> Hapus
                             </button>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-3">Belum ada mahasiswa</td>
+                        <td colspan="4" class="text-center text-muted py-3">Belum ada program studi</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -64,10 +62,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body">
-                Apakah Anda benar-benar ingin menghapus mahasiswa <strong id="modalNama"></strong>?
+                Apakah Anda yakin ingin menghapus program studi <strong id="modalNama"></strong>?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -89,8 +87,8 @@ document.querySelectorAll('.deleteBtn').forEach(button => {
         const id = this.dataset.id;
         const nama = this.dataset.nama;
         const form = document.getElementById('deleteForm');
-        form.action = `/mahasiswa/${id}`; // Update form action
-        document.getElementById('modalNama').innerText = nama; // Update nama di modal
+        form.action = `/prodi/${id}`;
+        document.getElementById('modalNama').innerText = nama;
     });
 });
 </script>

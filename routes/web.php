@@ -1,19 +1,25 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MahasiswaController;
-use App\Http\Controllers\HelloController;
+use App\Http\Controllers\ProdiController;
+use App\Http\Controllers\FakultasController;
+use Illuminate\Support\Facades\Route;
 
-// contoh dari latihan sebelumnya
-Route::get('/hello-controller', [HelloController::class, 'index']);
-Route::get('/hello', function () {
-    return 'Hello Laravel!';
-});
+// Halaman default
+Route::get('/', [MahasiswaController::class, 'index']);
 
-// redirect halaman utama ke daftar mahasiswa
-Route::get('/', function () {
-    return redirect()->route('mahasiswa.index');
-});
+// Resource route dengan parameter konsisten
+Route::resource('fakultas', FakultasController::class)->parameters([
+    'fakultas' => 'fakultas'
+]);
 
-// route otomatis untuk semua aksi CRUD mahasiswa
-Route::resource('mahasiswa', MahasiswaController::class);
+Route::resource('prodi', ProdiController::class)->parameters([
+    'prodi' => 'prodi'
+]);
+
+Route::resource('mahasiswa', MahasiswaController::class)->parameters([
+    'mahasiswa' => 'mahasiswa'
+]);
+
+// Route AJAX dependent dropdown
+Route::get('mahasiswa/get-prodi/{fakultas_id}', [MahasiswaController::class, 'getProdiByFakultas']);

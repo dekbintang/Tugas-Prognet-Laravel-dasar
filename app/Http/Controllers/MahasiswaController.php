@@ -3,73 +3,92 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
+use App\Models\Prodi;
+use App\Models\Fakultas;
 use Illuminate\Http\Request;
 
 class MahasiswaController extends Controller
 {
-    // Menampilkan semua data mahasiswa
+    // Menampilkan daftar mahasiswa
     public function index()
     {
-        $mahasiswa = Mahasiswa::orderBy('id', 'desc')->get();
+        $mahasiswa = Mahasiswa::with('prodi.fakultas')->get();
         return view('mahasiswa.index', compact('mahasiswa'));
     }
 
-    // Menampilkan form tambah mahasiswa
+    // Form tambah mahasiswa
     public function create()
     {
-        return view('mahasiswa.create');
+        $fakultas = Fakultas::all(); // Ambil semua fakultas
+        return view('mahasiswa.create', compact('fakultas'));
     }
 
-    // Menyimpan data mahasiswa baru
+    // Simpan mahasiswa baru
     public function store(Request $request)
     {
         $request->validate([
-            'nim' => 'required|unique:mahasiswa,nim|min:4',
+            'nim' => 'required|unique:mahasiswas,nim',
             'nama' => 'required',
-            'prodi' => 'required'
+            'fakultas_id' => 'required|exists:fakultas,id',
+            'prodi_id' => 'required|exists:prodis,id'
         ], [
-            'nim.required' => 'NIM wajib diisi.',
-            'nim.unique' => 'NIM ini sudah digunakan, silakan masukkan NIM lain.',
-            'nim.min' => 'NIM harus terdiri dari minimal 4 karakter.',
-            'nama.required' => 'Nama mahasiswa wajib diisi.',
-            'prodi.required' => 'Program studi wajib diisi.'
+            'nim.required' => 'NIM harus diisi!',
+            'nim.unique' => 'NIM sudah digunakan!',
+            'nama.required' => 'Nama harus diisi!',
+            'fakultas_id.required' => 'Fakultas harus dipilih!',
+            'prodi_id.required' => 'Program Studi harus dipilih!'
         ]);
 
-        Mahasiswa::create($request->only('nim', 'nama', 'prodi'));
+        Mahasiswa::create($request->only('nim', 'nama', 'prodi_id'));
 
-        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil disimpan.');
+        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil ditambahkan!');
     }
 
-    // Menampilkan form edit mahasiswa berdasarkan ID
+    // Form edit mahasiswa
     public function edit(Mahasiswa $mahasiswa)
     {
-        return view('mahasiswa.edit', compact('mahasiswa'));
+        $fakultas = Fakultas::all();
+        $prodi = Prodi::where('fakultas_id', $mahasiswa->prodi->fakultas_id)->get();
+
+        return view('mahasiswa.edit', compact('mahasiswa', 'fakultas', 'prodi'));
     }
 
-    // Mengupdate data mahasiswa yang sudah ada
+    // Update data mahasiswa
     public function update(Request $request, Mahasiswa $mahasiswa)
     {
         $request->validate([
-            'nim' => 'required|min:4|unique:mahasiswa,nim,' . $mahasiswa->id,
+            'nim' => 'required|unique:mahasiswas,nim,' . $mahasiswa->id,
             'nama' => 'required',
-            'prodi' => 'required'
+            'fakultas_id' => 'required|exists:fakultas,id',
+            'prodi_id' => 'required|exists:prodis,id'
         ], [
-            'nim.required' => 'NIM wajib diisi.',
-            'nim.min' => 'NIM harus terdiri dari minimal 4 karakter.',
-            'nim.unique' => 'NIM ini sudah digunakan oleh mahasiswa lain.',
-            'nama.required' => 'Nama mahasiswa wajib diisi.',
-            'prodi.required' => 'Program studi wajib diisi.'
+            'nim.required' => 'NIM harus diisi!',
+            'nim.unique' => 'NIM sudah digunakan!',
+            'nama.required' => 'Nama harus diisi!',
+            'fakultas_id.required' => 'Fakultas harus dipilih!',
+            'prodi_id.required' => 'Program Studi harus dipilih!'
         ]);
 
-        $mahasiswa->update($request->only('nim', 'nama', 'prodi'));
+        $mahasiswa->update($request->only('nim', 'nama', 'prodi_id'));
 
-        return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
+        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil diperbarui!');
     }
 
-    // Menghapus data mahasiswa
+    // Hapus mahasiswa
     public function destroy(Mahasiswa $mahasiswa)
     {
-        $mahasiswa->delete();
-        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil dihapus.');
+        try {
+            $mahasiswa->delete();
+            return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil dihapus!');
+        } catch (\Exception $e) {
+            return redirect()->route('mahasiswa.index')->with('error', 'Terjadi kesalahan saat menghapus mahasiswa.');
+        }
+    }
+
+    // Endpoint AJAX untuk dependent dropdown prodi
+    public function getProdiByFakultas($fakultas_id)
+    {
+        $prodi = Prodi::where('fakultas_id', $fakultas_id)->get();
+        return response()->json($prodi);
     }
 }

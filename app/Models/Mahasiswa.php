@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mahasiswa extends Model
 {
-    use HasFactory;
+    protected $table = 'mahasiswas'; // sesuaikan dengan nama tabel migration
+    protected $fillable = ['nim', 'nama', 'prodi_id']; // HARUS SESUAI KOLOM DATABASE
 
-    protected $table = 'mahasiswa';        // pastikan sesuai migration
-    protected $fillable = ['nim', 'nama', 'prodi'];
+    public function prodi()
+    
+    {
+        return $this->belongsTo(Prodi::class);
+    }
 }
