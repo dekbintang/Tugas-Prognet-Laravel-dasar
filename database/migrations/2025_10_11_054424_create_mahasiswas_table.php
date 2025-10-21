@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('mahasiswas', function (Blueprint $table) {
             $table->id();
-            $table->string('nim', 20)->unique();
-            $table->string('nama', 100);
+            $table->string('nim')->unique();
+            $table->string('nama');
             $table->foreignId('prodi_id')->constrained('prodis')->onDelete('cascade');
             $table->timestamps();
         });

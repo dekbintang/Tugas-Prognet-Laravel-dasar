@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +10,13 @@ class Prodi extends Model
     use HasFactory;
 
     protected $table = 'prodis';
-    protected $fillable = ['nama_prodi', 'fakultas_id'];
+    protected $fillable = [
+        'kode_prodi',
+        'nama_prodi',
+        'kaprodi',
+        'akreditasi', // hanya prodi yang punya akreditasi
+        'fakultas_id',
+    ];
 
     public function fakultas()
     {

@@ -1,25 +1,28 @@
 <?php
 
-use App\Http\Controllers\MahasiswaController;
-use App\Http\Controllers\ProdiController;
-use App\Http\Controllers\FakultasController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FakultasController;
+use App\Http\Controllers\ProdiController;
+use App\Http\Controllers\MahasiswaController;
 
-// Halaman default
-Route::get('/', [MahasiswaController::class, 'index']);
 
-// Resource route dengan parameter konsisten
-Route::resource('fakultas', FakultasController::class)->parameters([
-    'fakultas' => 'fakultas'
+Route::redirect('/', '/mahasiswa');
+
+// ================================
+Route::resources([
+    'prodi' => ProdiController::class,
+    'mahasiswa' => MahasiswaController::class,
 ]);
 
-Route::resource('prodi', ProdiController::class)->parameters([
-    'prodi' => 'prodi'
-]);
 
-Route::resource('mahasiswa', MahasiswaController::class)->parameters([
-    'mahasiswa' => 'mahasiswa'
-]);
+// Filter mahasiswa berdasarkan Fakultas & Prodi
+Route::get('mahasiswa/filter', [MahasiswaController::class, 'filter'])->name('mahasiswa.filter');
 
-// Route AJAX dependent dropdown
-Route::get('mahasiswa/get-prodi/{fakultas_id}', [MahasiswaController::class, 'getProdiByFakultas']);
+// AJAX untuk dropdown Prodi berdasarkan Fakultas
+Route::get('mahasiswa/get-prodi/{fakultas_id}', [MahasiswaController::class, 'getProdiByFakultas'])
+    ->name('mahasiswa.getProdi');
+
+Route::get('/get-prodi-by-fakultas/{id}', [MahasiswaController::class, 'getProdiByFakultas']);
+
+Route::resource('fakultas', FakultasController::class)
+    ->parameters(['fakultas' => 'fakultas']); 

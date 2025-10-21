@@ -10,8 +10,8 @@ class ProdiController extends Controller
 {
     public function index()
     {
-        // Ambil semua prodi beserta relasi fakultas, urutkan berdasarkan nama
-        $prodi = Prodi::with('fakultas')->orderBy('nama_prodi')->get();
+        // Ambil semua prodi beserta fakultasnya
+        $prodi = Prodi::with('fakultas')->orderBy('id', 'desc')->get();
         return view('prodi.index', compact('prodi'));
     }
 
@@ -23,19 +23,25 @@ class ProdiController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nama_prodi' => 'required|string|max:255|unique:prodis,nama_prodi',
+        $request->validate([
+            'nama_prodi' => 'required|unique:prodis,nama_prodi',
             'fakultas_id' => 'required|exists:fakultas,id',
+            'akreditasi' => 'required|string',
         ], [
-            'nama_prodi.required' => 'Nama program studi wajib diisi.',
-            'nama_prodi.unique' => 'Nama program studi sudah ada.',
-            'fakultas_id.required' => 'Fakultas wajib dipilih.',
-            'fakultas_id.exists' => 'Fakultas yang dipilih tidak valid.',
+            'nama_prodi.required' => 'Nama Prodi harus diisi!',
+            'nama_prodi.unique' => 'Nama Prodi sudah ada!',
+            'fakultas_id.required' => 'Fakultas harus dipilih!',
+            'akreditasi.required' => 'Akreditasi harus diisi!',
         ]);
 
-        Prodi::create($validated);
+        // Tambahkan akreditasi ke database
+        Prodi::create([
+            'nama_prodi' => $request->nama_prodi,
+            'fakultas_id' => $request->fakultas_id,
+            'akreditasi' => $request->akreditasi,
+        ]);
 
-        return redirect()->route('prodi.index')->with('success', 'Program studi berhasil ditambahkan.');
+        return redirect()->route('prodi.index')->with('success', 'Prodi berhasil ditambahkan!');
     }
 
     public function edit(Prodi $prodi)
@@ -46,25 +52,29 @@ class ProdiController extends Controller
 
     public function update(Request $request, Prodi $prodi)
     {
-        $validated = $request->validate([
-            'nama_prodi' => 'required|string|max:255|unique:prodis,nama_prodi,' . $prodi->id,
+        $request->validate([
+            'nama_prodi' => 'required|unique:prodis,nama_prodi,' . $prodi->id,
             'fakultas_id' => 'required|exists:fakultas,id',
+            'akreditasi' => 'required|string',
         ], [
-            'nama_prodi.required' => 'Nama program studi wajib diisi.',
-            'nama_prodi.unique' => 'Nama program studi sudah ada.',
-            'fakultas_id.required' => 'Fakultas wajib dipilih.',
-            'fakultas_id.exists' => 'Fakultas yang dipilih tidak valid.',
+            'nama_prodi.required' => 'Nama Prodi harus diisi!',
+            'nama_prodi.unique' => 'Nama Prodi sudah ada!',
+            'fakultas_id.required' => 'Fakultas harus dipilih!',
+            'akreditasi.required' => 'Akreditasi harus diisi!',
         ]);
 
-        $prodi->update($validated);
+        $prodi->update([
+            'nama_prodi' => $request->nama_prodi,
+            'fakultas_id' => $request->fakultas_id,
+            'akreditasi' => $request->akreditasi,
+        ]);
 
-        return redirect()->route('prodi.index')->with('success', 'Program studi berhasil diperbarui.');
+        return redirect()->route('prodi.index')->with('success', 'Prodi berhasil diperbarui!');
     }
-
 
     public function destroy(Prodi $prodi)
     {
         $prodi->delete();
-        return redirect()->route('prodi.index')->with('success', 'Program studi berhasil dihapus!');
+        return redirect()->route('prodi.index')->with('success', 'Prodi berhasil dihapus!');
     }
 }

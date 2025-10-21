@@ -1,56 +1,113 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Mahasiswa')
-
 @section('content')
-<div class="container py-5">
+<div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-secondary fw-bold">Daftar Mahasiswa</h2>
-        <a href="{{ route('mahasiswa.create') }}" class="btn btn-success btn-gradient d-flex align-items-center">
-            <i class="bi bi-plus-lg me-2"></i> Tambah Mahasiswa
+        <h3 class="fw-bold">Daftar Mahasiswa</h3>
+        <a href="{{ route('mahasiswa.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Mahasiswa
         </a>
     </div>
 
-    {{-- Flash Message --}}
-    @if(session()->has('success'))
-        <div class="alert alert-success shadow-sm rounded-3">
-            {{ session()->pull('success') }}
+    <!-- Filter dan Pencarian -->
+    <form method="GET" action="{{ route('mahasiswa.index') }}" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">Fakultas</label>
+            <select name="fakultas_id" id="fakultas_id" class="form-select">
+                <option value="">-- Semua Fakultas --</option>
+                @foreach($fakultas as $f)
+                    <option value="{{ $f->id }}" {{ request('fakultas_id') == $f->id ? 'selected' : '' }}>
+                        {{ $f->nama_fakultas }}
+                    </option>
+                @endforeach
+            </select>
         </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">Program Studi</label>
+            <select name="prodi_id" id="prodi_id" class="form-select">
+                <option value="">-- Semua Prodi --</option>
+                @foreach($prodi as $p)
+                    @if (!request()->filled('fakultas_id') || $p->fakultas_id == request('fakultas_id'))
+                        <option value="{{ $p->id }}" {{ request('prodi_id') == $p->id ? 'selected' : '' }}>
+                            {{ $p->nama_prodi }}
+                        </option>
+                    @endif
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">🔍 Cari</button>
+        </div>
+    </form>
+
+    <!-- Pesan sukses/error -->
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @elseif (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
+    <!-- Tabel Mahasiswa -->
     <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="background: linear-gradient(135deg, #a8e6cf, #dcedc1); color: #2c3e50;">
+        <div class="card-body">
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
                     <tr>
-                        <th>#</th>
-                        <th>Nama</th>
+                        <th>No</th>
                         <th>NIM</th>
-                        <th>Prodi</th>
-                        <th class="text-center">Aksi</th>
+                        <th>Nama</th>
+                        <th>Fakultas</th>
+                        <th>Program Studi</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($mahasiswa as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->nama }}</td>
-                        <td>{{ $item->nim }}</td>
-                        <td>{{ $item->prodi->nama_prodi ?? '-' }}</td>
-                        <td class="text-center">
-                            <a href="{{ route('mahasiswa.edit', $item->id) }}" class="btn btn-outline-warning btn-sm me-2">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </a>
-                            <button type="button" class="btn btn-outline-danger btn-sm deleteBtn" 
-                                data-id="{{ $item->id }}" data-nama="{{ $item->nama }}" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                <i class="bi bi-trash3"></i> Hapus
-                            </button>
-                        </td>
-                    </tr>
+                    @forelse ($mahasiswa as $index => $m)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $m->nim }}</td>
+                            <td>{{ $m->nama }}</td>
+                            <td>{{ $m->prodi->fakultas->nama_fakultas }}</td>
+                            <td>{{ $m->prodi->nama_prodi }}</td>
+                            <td>
+                                <a href="{{ route('mahasiswa.edit', $m->id) }}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <!-- Tombol Hapus Modal -->
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $m->id }}">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+
+                                <!-- Modal Konfirmasi Hapus -->
+                                <div class="modal fade" id="deleteModal{{ $m->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $m->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel{{ $m->id }}">Konfirmasi Hapus</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Yakin ingin menghapus mahasiswa <strong>{{ $m->nama }}</strong> ({{ $m->nim }})?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <form action="{{ route('mahasiswa.destroy', $m->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Modal -->
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-3">Belum ada mahasiswa</td>
-                    </tr>
+                        <tr><td colspan="6" class="text-muted">Belum ada data mahasiswa.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -58,40 +115,32 @@
     </div>
 </div>
 
-<!-- Modal Hapus -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Apakah Anda benar-benar ingin menghapus mahasiswa <strong id="modalNama"></strong>?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <form id="deleteForm" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Hapus</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
-
-@push('scripts')
+<!-- Script AJAX untuk Filter Prodi -->
 <script>
-document.querySelectorAll('.deleteBtn').forEach(button => {
-    button.addEventListener('click', function() {
-        const id = this.dataset.id;
-        const nama = this.dataset.nama;
-        const form = document.getElementById('deleteForm');
-        form.action = `/mahasiswa/${id}`; // Update form action
-        document.getElementById('modalNama').innerText = nama; // Update nama di modal
+document.addEventListener('DOMContentLoaded', function () {
+    const fakultasSelect = document.getElementById('fakultas_id');
+    const prodiSelect = document.getElementById('prodi_id');
+
+    fakultasSelect.addEventListener('change', function () {
+        const fakultasId = this.value;
+        prodiSelect.innerHTML = '<option value="">Memuat...</option>';
+
+        if (fakultasId) {
+            fetch(`/get-prodi-by-fakultas/${fakultasId}`)
+                .then(res => res.json())
+                .then(data => {
+                    prodiSelect.innerHTML = '<option value="">-- Semua Prodi --</option>';
+                    data.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.textContent = p.nama_prodi;
+                        prodiSelect.appendChild(opt);
+                    });
+                });
+        } else {
+            prodiSelect.innerHTML = '<option value="">-- Semua Prodi --</option>';
+        }
     });
 });
 </script>
-@endpush
+@endsection

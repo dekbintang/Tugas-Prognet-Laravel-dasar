@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('fakultas', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_fakultas', 100);
+            $table->string('nama_fakultas');
+            $table->string('kode_fakultas')->nullable(); // kolom tambahan
             $table->timestamps();
         });
     }

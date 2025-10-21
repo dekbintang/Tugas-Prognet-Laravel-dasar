@@ -3,91 +3,76 @@
 @section('title', 'Daftar Fakultas')
 
 @section('content')
-<div class="container py-5">
+<div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-secondary fw-bold">Daftar Fakultas</h2>
-        <a href="{{ route('fakultas.create') }}" class="btn btn-success btn-gradient d-flex align-items-center">
-            <i class="bi bi-plus-lg me-2"></i> Tambah Fakultas
+        <h3 class="fw-bold">Daftar Fakultas</h3>
+        <a href="{{ route('fakultas.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Fakultas
         </a>
     </div>
 
-    {{-- Flash Message --}}
-    @if(session()->has('success'))
-        <div class="alert alert-success shadow-sm rounded-3">
-            {{ session()->pull('success') }}
-        </div>
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @elseif (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
     <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="background: linear-gradient(135deg, #a8e6cf, #dcedc1); color: #2c3e50;">
+        <div class="card-body">
+            <table class="table table-bordered text-center align-middle">
+                <thead class="table-light">
                     <tr>
-                        <th>#</th>
+                        <th>No</th>
                         <th>Nama Fakultas</th>
-                        <th class="text-center">Aksi</th>
+                        <th>Kode Fakultas</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($fakultas as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->nama_fakultas }}</td>
-                        <td class="text-center">
-                            <a href="{{ route('fakultas.edit', $item->id) }}" class="btn btn-outline-warning btn-sm me-2">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </a>
-                            <button type="button" class="btn btn-outline-danger btn-sm deleteBtn" 
-                                data-id="{{ $item->id }}" data-nama="{{ $item->nama_fakultas }}" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                <i class="bi bi-trash3"></i> Hapus
-                            </button>
-                        </td>
-                    </tr>
+                    @forelse($fakultas as $index => $f)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $f->nama_fakultas }}</td>
+                            <td>{{ $f->kode_fakultas }}</td>
+                            <td>
+                                <a href="{{ route('fakultas.edit', $f->id) }}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $f->id }}">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+
+                                <!-- Modal Hapus -->
+                                <div class="modal fade" id="deleteModal{{ $f->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $f->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel{{ $f->id }}">Konfirmasi Hapus</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Yakin ingin menghapus fakultas <strong>{{ $f->nama_fakultas }}</strong>?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <form action="{{ route('fakultas.destroy', $f->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Modal -->
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="3" class="text-center text-muted py-3">Belum ada fakultas</td>
-                    </tr>
+                        <tr><td colspan="4" class="text-muted">Belum ada data fakultas.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-<!-- Modal Hapus -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Apakah Anda benar-benar ingin menghapus fakultas <strong id="modalNama"></strong>?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <form id="deleteForm" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Hapus</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
-
-@push('scripts')
-<script>
-document.querySelectorAll('.deleteBtn').forEach(button => {
-    button.addEventListener('click', function() {
-        const id = this.dataset.id;
-        const nama = this.dataset.nama;
-        const form = document.getElementById('deleteForm');
-        form.action = `/fakultas/${id}`; // Update form action
-        document.getElementById('modalNama').innerText = nama; // Update nama di modal
-    });
-});
-</script>   
-@endpush
