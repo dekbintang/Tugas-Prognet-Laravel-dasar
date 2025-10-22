@@ -95,7 +95,7 @@
 </div>
 
 <footer>
-  <small><i class="bi bi-code-slash"></i> {{ date('Y') }} Sistem Akademik | Laravel + Bootstrap 5</small>
+  <small><i class=""></i>Sistem Akademik</small>
 </footer>
 
 <!-- Bootstrap JS -->
