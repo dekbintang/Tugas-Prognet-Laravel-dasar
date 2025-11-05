@@ -1,28 +1,62 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+// use App\Http\Controllers\ProfileController;
+// use Illuminate\Support\Facades\Route;
+
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Route::middleware('auth')->group(function () {
+//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// });
+
+// Route::middleware(['auth', 'admin'])->group(function(){
+//     Route::resource('mahasiswa', MahasiswaController::class)->except(['index']);
+//     Route::resource('prodi', ProdiController::class)->except(['index']);
+// });
+
+// require __DIR__.'/auth.php'; -->
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\FakultasController;
 use App\Http\Controllers\ProdiController;
-use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
+    return view('welcome');
+});
 
-Route::redirect('/', '/mahasiswa');
+// CRUD untuk admin - exclude index dan show
+Route::middleware(['auth', 'admin'])->group(function(){
+    Route::resource('mahasiswa', MahasiswaController::class)->except(['index', 'show']);
+    Route::resource('fakultas', FakultasController::class)->except(['index', 'show'])->parameters([
+        'fakultas' => 'fakultas'
+    ]);
+    Route::resource('prodi', ProdiController::class)->except(['index', 'show']);
+});
 
-// ================================
-Route::resources([
-    'prodi' => ProdiController::class,
-    'mahasiswa' => MahasiswaController::class,
-]);
+// Index untuk semua user (tanpa show)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/get-prodi/{fakultas_id}', [MahasiswaController::class, 'getProdiByFakultas']);
+    
+    Route::get('/mahasiswa', [MahasiswaController::class, 'index'])->name('mahasiswa.index');
+    Route::get('/fakultas', [FakultasController::class, 'index'])->name('fakultas.index');
+    Route::get('/prodi', [ProdiController::class, 'index'])->name('prodi.index');
+    
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-// Filter mahasiswa berdasarkan Fakultas & Prodi
-Route::get('mahasiswa/filter', [MahasiswaController::class, 'filter'])->name('mahasiswa.filter');
-
-// AJAX untuk dropdown Prodi berdasarkan Fakultas
-Route::get('mahasiswa/get-prodi/{fakultas_id}', [MahasiswaController::class, 'getProdiByFakultas'])
-    ->name('mahasiswa.getProdi');
-
-Route::get('/get-prodi-by-fakultas/{id}', [MahasiswaController::class, 'getProdiByFakultas']);
-
-Route::resource('fakultas', FakultasController::class)
-    ->parameters(['fakultas' => 'fakultas']); 
+require __DIR__.'/auth.php';

@@ -3,101 +3,104 @@
 @section('title', 'Tambah Mahasiswa')
 
 @section('content')
-<div class="container mt-4">
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">Tambah Mahasiswa</h5>
-            <a href="{{ route('mahasiswa.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i> Kembali
-            </a>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-person-plus"></i> Tambah Mahasiswa</h2>
+    <a href="{{ route('mahasiswa.index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
 
-        <div class="card-body">
-            <form action="{{ route('mahasiswa.store') }}" method="POST" novalidate>
-                @csrf
-
-                {{-- NIM --}}
-                <div class="mb-3">
+<div class="card">
+    <div class="card-body">
+        <form action="{{ route('mahasiswa.store') }}" method="POST">
+            @csrf
+            <div class="row g-3">
+                <div class="col-md-6">
                     <label for="nim" class="form-label">NIM</label>
-                    <input type="text" class="form-control @error('nim') is-invalid @enderror" id="nim" name="nim" value="{{ old('nim') }}">
+                    <input type="text" name="nim" id="nim" class="form-control @error('nim') is-invalid @enderror"
+                           value="{{ old('nim') }}" placeholder="Masukkan NIM" required>
                     @error('nim')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                {{-- Nama --}}
-                <div class="mb-3">
+                <div class="col-md-6">
                     <label for="nama" class="form-label">Nama Mahasiswa</label>
-                    <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama" value="{{ old('nama') }}">
+                    <input type="text" name="nama" id="nama" class="form-control @error('nama') is-invalid @enderror"
+                           value="{{ old('nama') }}" placeholder="Masukkan nama lengkap" required>
                     @error('nama')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                {{-- Fakultas --}}
-                <div class="mb-3">
-                    <label for="fakultas" class="form-label">Fakultas</label>
-                    <select class="form-select @error('fakultas_id') is-invalid @enderror" id="fakultas" name="fakultas_id">
-                        <option value="">-- Pilih Fakultas --</option>
+                <div class="col-md-6">
+                    <label for="fakultas_id" class="form-label">Fakultas</label>
+                    <select id="fakultas_id" class="form-select" required>
+                        <option value="">Pilih Fakultas</option>
                         @foreach($fakultas as $f)
                             <option value="{{ $f->id }}" {{ old('fakultas_id') == $f->id ? 'selected' : '' }}>
                                 {{ $f->nama_fakultas }}
                             </option>
                         @endforeach
                     </select>
-                    @error('fakultas_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
                 </div>
 
-                {{-- Prodi --}}
-                <div class="mb-3">
-                    <label for="prodi" class="form-label">Program Studi</label>
-                    <select class="form-select @error('prodi_id') is-invalid @enderror" id="prodi" name="prodi_id">
-                        <option value="">-- Pilih Prodi --</option>
+                <div class="col-md-6">
+                    <label for="prodi_id" class="form-label">Program Studi</label>
+                    <select name="prodi_id" id="prodi_id" class="form-select @error('prodi_id') is-invalid @enderror" required disabled>
+                        <option value="">Pilih Fakultas Terlebih Dahulu</option>
                     </select>
                     @error('prodi_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Simpan
+                </button>
+                <a href="{{ route('mahasiswa.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Batal
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
-{{-- Script AJAX untuk Dependent Dropdown --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const fakultasSelect = document.getElementById('fakultas');
-    const prodiSelect = document.getElementById('prodi');
-
-    fakultasSelect.addEventListener('change', function() {
-        const fakultasId = this.value;
-        prodiSelect.innerHTML = '<option value="">Memuat...</option>';
-
-        if (fakultasId) {
-            fetch(`/mahasiswa/get-prodi/${fakultasId}`)
-                .then(res => res.json())
-                .then(data => {
-                    let options = '<option value="">-- Pilih Prodi --</option>';
-                    data.forEach(p => {
-                        options += `<option value="${p.id}">${p.nama_prodi}</option>`;
+document.getElementById('fakultas_id').addEventListener('change', function() {
+    const fakultasId = this.value;
+    const prodiSelect = document.getElementById('prodi_id');
+    
+    prodiSelect.innerHTML = '<option value="">Loading...</option>';
+    prodiSelect.disabled = true;
+    
+    if (fakultasId) {
+        fetch(`/get-prodi/${fakultasId}`)
+            .then(response => response.json())
+            .then(data => {
+                prodiSelect.innerHTML = '<option value="">Pilih Program Studi</option>';
+                
+                if (data.length > 0) {
+                    data.forEach(prodi => {
+                        const option = document.createElement('option');
+                        option.value = prodi.id;
+                        option.textContent = prodi.nama_prodi;
+                        prodiSelect.appendChild(option);
                     });
-                    prodiSelect.innerHTML = options;
-                })
-                .catch(() => {
-                    prodiSelect.innerHTML = '<option value="">Gagal memuat data</option>';
-                });
-        } else {
-            prodiSelect.innerHTML = '<option value="">-- Pilih Prodi --</option>';
-        }
-    });
+                    prodiSelect.disabled = false;
+                } else {
+                    prodiSelect.innerHTML = '<option value="">Tidak ada prodi tersedia</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                prodiSelect.innerHTML = '<option value="">Error loading data</option>';
+            });
+    } else {
+        prodiSelect.innerHTML = '<option value="">Pilih Fakultas Terlebih Dahulu</option>';
+    }
 });
 </script>
+
 @endsection

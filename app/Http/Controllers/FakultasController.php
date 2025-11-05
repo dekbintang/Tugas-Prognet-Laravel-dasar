@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class FakultasController extends Controller
 {
-    // Menampilkan daftar fakultas
     public function index()
     {
         $fakultas = Fakultas::all();

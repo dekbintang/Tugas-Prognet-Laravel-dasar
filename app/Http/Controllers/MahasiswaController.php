@@ -31,7 +31,7 @@ class MahasiswaController extends Controller
 
     public function create()
     {
-        $fakultas = Fakultas::with('prodi')->get();
+        $fakultas = Fakultas::all();
         return view('mahasiswa.create', compact('fakultas'));
     }
 
@@ -83,6 +83,7 @@ class MahasiswaController extends Controller
 
     public function getProdiByFakultas($fakultas_id)
     {
-        return response()->json(Prodi::where('fakultas_id', $fakultas_id)->get());
+        $prodi = Prodi::where('fakultas_id', $fakultas_id)->get();
+        return response()->json($prodi);
     }
 }

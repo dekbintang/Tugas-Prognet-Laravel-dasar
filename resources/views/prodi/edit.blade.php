@@ -1,40 +1,36 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Prodi')
+@section('title', 'Edit Program Studi')
 
 @section('content')
-<div class="container mt-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">Edit Prodi</h5>
-            <a href="{{ route('prodi.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i> Kembali
-            </a>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('prodi.update', $prodi->id) }}" method="POST" novalidate>
-                @csrf
-                @method('PUT')
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Program Studi</h2>
+    <a href="{{ route('prodi.index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
 
-                {{-- Nama Prodi --}}
-                <div class="mb-3">
-                    <label for="nama_prodi" class="form-label">Nama Prodi</label>
-                    <input type="text" 
-                           class="form-control @error('nama_prodi') is-invalid @enderror" 
-                           id="nama_prodi" 
-                           name="nama_prodi" 
-                           value="{{ old('nama_prodi', $prodi->nama_prodi) }}">
+<div class="card">
+    <div class="card-body">
+        <form action="{{ route('prodi.update', $prodi->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="nama_prodi" class="form-label">Nama Program Studi</label>
+                    <input type="text" name="nama_prodi" id="nama_prodi" 
+                           class="form-control @error('nama_prodi') is-invalid @enderror"
+                           value="{{ old('nama_prodi', $prodi->nama_prodi) }}" required>
                     @error('nama_prodi')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                {{-- Fakultas --}}
-                <div class="mb-3">
+                <div class="col-md-6">
                     <label for="fakultas_id" class="form-label">Fakultas</label>
-                    <select class="form-select @error('fakultas_id') is-invalid @enderror" 
-                            id="fakultas_id" name="fakultas_id">
-                        <option value="">-- Pilih Fakultas --</option>
+                    <select name="fakultas_id" id="fakultas_id" 
+                            class="form-select @error('fakultas_id') is-invalid @enderror" required>
                         @foreach($fakultas as $f)
                             <option value="{{ $f->id }}" {{ old('fakultas_id', $prodi->fakultas_id) == $f->id ? 'selected' : '' }}>
                                 {{ $f->nama_fakultas }}
@@ -46,30 +42,29 @@
                     @enderror
                 </div>
 
-                {{-- Akreditasi --}}
-                <div class="mb-3">
+                <div class="col-md-6">
                     <label for="akreditasi" class="form-label">Akreditasi</label>
-                    <input type="text" 
-                           class="form-control @error('akreditasi') is-invalid @enderror" 
-                           id="akreditasi" 
-                           name="akreditasi" 
-                           value="{{ old('akreditasi', $prodi->akreditasi) }}">
+                    <select name="akreditasi" id="akreditasi" 
+                            class="form-select @error('akreditasi') is-invalid @enderror" required>
+                        <option value="A" {{ old('akreditasi', $prodi->akreditasi) == 'A' ? 'selected' : '' }}>A</option>
+                        <option value="B" {{ old('akreditasi', $prodi->akreditasi) == 'B' ? 'selected' : '' }}>B</option>
+                        <option value="C" {{ old('akreditasi', $prodi->akreditasi) == 'C' ? 'selected' : '' }}>C</option>
+                    </select>
                     @error('akreditasi')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+            </div>
 
-                {{-- Tombol --}}
-                <div class="d-flex justify-content-between">
-                    <a href="{{ route('prodi.index') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Kembali
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan Perubahan
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Update
+                </button>
+                <a href="{{ route('prodi.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Batal
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

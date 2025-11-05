@@ -1,105 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard Akademik')</title>
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Sistem Informasi Mahasiswa')</title>
+    
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
     <style>
         body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            min-height: 100vh;
             background-color: #ffffff;
-            font-family: 'Poppins', sans-serif;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
         }
-        .navbar {
-            background-color: #ffffff;
-            border-bottom: 1px solid #dee2e6;
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 10px;
+            transition: all 0.3s;
         }
-        .navbar-brand {
-            font-weight: 600;
-            color: #212529 !important;
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #212529;
         }
-        .nav-link {
-            color: #212529 !important;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .nav-link:hover {
-            color: #6c757d !important;
+        .sidebar .nav-link.active {
+            background-color: #e9ecef;
+            color: #212529;
+            font-weight: 500;
         }
         .card {
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 12px;
+        }
+        .navbar {
+            background-color: #ffffff !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .btn-primary {
-            background-color: #212529;
-            border-color: #212529;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
         }
-        .btn-primary:hover {
-            background-color: #343a40;
-        }
-        .btn-light {
-            border: 1px solid #ced4da;
-        }
-        footer {
-            border-top: 1px solid #dee2e6;
-            padding: 15px 0;
-            color: #6c757d;
-            text-align: center;
-            margin-top: 50px;
+        .table {
+            background-color: #ffffff;
         }
     </style>
+    
+    @stack('styles')
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">
+                <i class="bi bi-mortarboard-fill"></i> SIM Mahasiswa
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-<nav class="navbar navbar-expand-lg mb-4 shadow-sm">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-      <i class="bi bi-mortarboard-fill me-2"></i> Dashboard Akademik
-    </a>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-md-block sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        
+                        @if(Auth::check() && Auth::user()->role === 'admin')
+                        <li class="nav-item mt-2">
+                            <small class="text-muted px-3">MENU ADMIN</small>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('mahasiswa.*') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}">
+                                <i class="bi bi-people"></i> Mahasiswa
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('fakultas.*') ? 'active' : '' }}" href="{{ route('fakultas.index') }}">
+                                <i class="bi bi-building"></i> Fakultas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('prodi.*') ? 'active' : '' }}" href="{{ route('prodi.index') }}">
+                                <i class="bi bi-book"></i> Program Studi
+                            </a>
+                        </li>
+                        @endif
+                    </ul>
+                </div>
+            </nav>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+                @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto fw-medium">
-        <li class="nav-item">
-          <a href="{{ route('mahasiswa.index') }}" class="nav-link">
-            <i class="bi bi-person-lines-fill"></i> Mahasiswa
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ route('prodi.index') }}" class="nav-link">
-            <i class="bi bi-journal-text"></i> Prodi
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ route('fakultas.index') }}" class="nav-link">
-            <i class="bi bi-building"></i> Fakultas
-          </a>
-        </li>
-      </ul>
+                @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
+
+                @yield('content')
+            </main>
+        </div>
     </div>
-  </div>
-</nav>
 
-<div class="container mb-5">
-    @yield('content')
-</div>
-
-<footer>
-  <small><i class=""></i>Sistem Akademik</small>
-</footer>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    @stack('scripts')
 </body>
 </html>

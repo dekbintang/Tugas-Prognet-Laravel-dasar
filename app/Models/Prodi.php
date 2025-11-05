@@ -13,8 +13,7 @@ class Prodi extends Model
     protected $fillable = [
         'kode_prodi',
         'nama_prodi',
-        'kaprodi',
-        'akreditasi', // hanya prodi yang punya akreditasi
+        'akreditasi',
         'fakultas_id',
     ];
 
