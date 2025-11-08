@@ -8,11 +8,17 @@ use Illuminate\Http\Request;
 
 class ProdiController extends Controller
 {
-    public function index()
+    // Di controller:
+    public function index(Request $request)
     {
-        // Ambil semua prodi beserta fakultasnya
-        $prodi = Prodi::with('fakultas')->orderBy('id', 'desc')->get();
-        return view('prodi.index', compact('prodi'));
+        $query = Prodi::with('fakultas', 'mahasiswa');
+        if ($request->filled('fakultas_id')) {
+            $query->where('fakultas_id', $request->fakultas_id);
+        }
+        $prodi = $query->get();
+        $fakultas = Fakultas::all();
+
+        return view('prodi.index', compact('prodi', 'fakultas'));
     }
 
     public function create()

@@ -10,65 +10,76 @@
     </a>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <form action="{{ route('mahasiswa.store') }}" method="POST">
-            @csrf
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="nim" class="form-label">NIM</label>
-                    <input type="text" name="nim" id="nim" class="form-control @error('nim') is-invalid @enderror"
-                           value="{{ old('nim') }}" placeholder="Masukkan NIM" required>
-                    @error('nim')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+{{-- Tampilkan form hanya jika admin --}}
+@auth
+    @if (Auth::user()->role === 'admin')
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ route('mahasiswa.store') }}" method="POST">
+                @csrf
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="nim" class="form-label">NIM</label>
+                        <input type="text" name="nim" id="nim" class="form-control @error('nim') is-invalid @enderror"
+                               value="{{ old('nim') }}" placeholder="Masukkan NIM" required>
+                        @error('nim')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="nama" class="form-label">Nama Mahasiswa</label>
+                        <input type="text" name="nama" id="nama" class="form-control @error('nama') is-invalid @enderror"
+                               value="{{ old('nama') }}" placeholder="Masukkan nama lengkap" required>
+                        @error('nama')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="fakultas_id" class="form-label">Fakultas</label>
+                        <select id="fakultas_id" class="form-select" required>
+                            <option value="">Pilih Fakultas</option>
+                            @foreach($fakultas as $f)
+                                <option value="{{ $f->id }}" {{ old('fakultas_id') == $f->id ? 'selected' : '' }}>
+                                    {{ $f->nama_fakultas }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="prodi_id" class="form-label">Program Studi</label>
+                        <select name="prodi_id" id="prodi_id" class="form-select @error('prodi_id') is-invalid @enderror" required disabled>
+                            <option value="">Pilih Fakultas Terlebih Dahulu</option>
+                        </select>
+                        @error('prodi_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label for="nama" class="form-label">Nama Mahasiswa</label>
-                    <input type="text" name="nama" id="nama" class="form-control @error('nama') is-invalid @enderror"
-                           value="{{ old('nama') }}" placeholder="Masukkan nama lengkap" required>
-                    @error('nama')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan
+                    </button>
+                    <a href="{{ route('mahasiswa.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Batal
+                    </a>
                 </div>
-
-                <div class="col-md-6">
-                    <label for="fakultas_id" class="form-label">Fakultas</label>
-                    <select id="fakultas_id" class="form-select" required>
-                        <option value="">Pilih Fakultas</option>
-                        @foreach($fakultas as $f)
-                            <option value="{{ $f->id }}" {{ old('fakultas_id') == $f->id ? 'selected' : '' }}>
-                                {{ $f->nama_fakultas }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="prodi_id" class="form-label">Program Studi</label>
-                    <select name="prodi_id" id="prodi_id" class="form-select @error('prodi_id') is-invalid @enderror" required disabled>
-                        <option value="">Pilih Fakultas Terlebih Dahulu</option>
-                    </select>
-                    @error('prodi_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-            <div class="mt-4 text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Simpan
-                </button>
-                <a href="{{ route('mahasiswa.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-circle"></i> Batal
-                </a>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+    @else
+        {{-- Jika user biasa, tampilkan pesan sederhana --}}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> Anda tidak memiliki akses untuk menambah mahasiswa.
+        </div>
+    @endif
+@endauth
 
 <script>
-document.getElementById('fakultas_id').addEventListener('change', function() {
+document.getElementById('fakultas_id')?.addEventListener('change', function() {
     const fakultasId = this.value;
     const prodiSelect = document.getElementById('prodi_id');
     
@@ -102,5 +113,4 @@ document.getElementById('fakultas_id').addEventListener('change', function() {
     }
 });
 </script>
-
 @endsection

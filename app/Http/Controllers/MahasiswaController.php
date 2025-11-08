@@ -11,22 +11,28 @@ class MahasiswaController extends Controller
 {
     public function index(Request $request)
     {
-        $fakultas = Fakultas::orderBy('nama_fakultas')->get();
-        $prodi = Prodi::orderBy('nama_prodi')->get();
+        $fakultas = Fakultas::all();
 
-        $mahasiswa = Mahasiswa::with('prodi.fakultas');
-
+        // Ambil data prodi sesuai fakultas yang dipilih
         if ($request->filled('fakultas_id')) {
-            $mahasiswa->whereHas('prodi', fn($q) => $q->where('fakultas_id', $request->fakultas_id));
+            $prodi = Prodi::where('fakultas_id', $request->fakultas_id)->get();
+        } else {
+            $prodi = Prodi::all();
         }
 
-        if ($request->filled('prodi_id')) {
-            $mahasiswa->where('prodi_id', $request->prodi_id);
-        }
+        // Query mahasiswa
+        $mahasiswa = Mahasiswa::with(['prodi.fakultas'])
+            ->when($request->fakultas_id, function ($query) use ($request) {
+                $query->whereHas('prodi.fakultas', function ($q) use ($request) {
+                    $q->where('id', $request->fakultas_id);
+                });
+            })
+            ->when($request->prodi_id, function ($query) use ($request) {
+                $query->where('prodi_id', $request->prodi_id);
+            })
+            ->get();
 
-        $mahasiswa = $mahasiswa->orderBy('id', 'desc')->get();
-
-        return view('mahasiswa.index', compact('mahasiswa', 'fakultas', 'prodi'));
+        return view('mahasiswa.index', compact('fakultas', 'prodi', 'mahasiswa'));
     }
 
     public function create()
